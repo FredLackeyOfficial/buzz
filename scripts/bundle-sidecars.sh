@@ -36,5 +36,6 @@ fi
 mkdir -p "$BINARIES_DIR"
 for bin in "${SIDECARS[@]}"; do
     cp "$SRC_DIR/${bin}${EXE}" "$BINARIES_DIR/${bin}-${TARGET}${EXE}"
+    chmod +x "$BINARIES_DIR/${bin}-${TARGET}${EXE}"
 done
 echo "Sidecars bundled for $TARGET"

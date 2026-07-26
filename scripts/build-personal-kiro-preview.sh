@@ -74,6 +74,13 @@ if [[ ! -d "$APP_PATH" ]]; then
   exit 1
 fi
 
+for sidecar in buzz-acp buzz-agent buzz-dev-mcp git-credential-nostr buzz; do
+  if [[ ! -x "$APP_PATH/Contents/MacOS/$sidecar" ]]; then
+    echo "Error: bundled sidecar is not executable: $sidecar" >&2
+    exit 1
+  fi
+done
+
 codesign --verify --deep --strict --verbose=2 "$APP_PATH"
 
 echo "Submitting the signed app to Apple for notarization..."
@@ -114,6 +121,12 @@ mkdir -p "$MOUNT_PATH"
 hdiutil attach -nobrowse -readonly -mountpoint "$MOUNT_PATH" "$DMG_PATH" -quiet
 ATTACHED=1
 codesign --verify --deep --strict --verbose=2 "$MOUNT_PATH/$APP_NAME.app"
+for sidecar in buzz-acp buzz-agent buzz-dev-mcp git-credential-nostr buzz; do
+  if [[ ! -x "$MOUNT_PATH/$APP_NAME.app/Contents/MacOS/$sidecar" ]]; then
+    echo "Error: packaged sidecar is not executable: $sidecar" >&2
+    exit 1
+  fi
+done
 spctl --assess --type execute --verbose=4 "$MOUNT_PATH/$APP_NAME.app"
 hdiutil detach "$MOUNT_PATH" -quiet
 ATTACHED=0
