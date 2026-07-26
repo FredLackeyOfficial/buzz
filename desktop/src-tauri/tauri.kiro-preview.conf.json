@@ -1,0 +1,24 @@
+{
+  "productName": "Buzz Kiro Preview",
+  "identifier": "com.fredlackey.buzz.kiro-preview",
+  "plugins": {
+    "updater": {
+      "endpoints": []
+    },
+    "deep-link": {
+      "desktop": {
+        "schemes": ["buzz-kiro-preview"]
+      }
+    }
+  },
+  "bundle": {
+    "createUpdaterArtifacts": false,
+    "macOS": {
+      "minimumSystemVersion": "10.15",
+      "signingIdentity": "Developer ID Application: Fred Lackey (45X9J287ZA)",
+      "hardenedRuntime": true,
+      "entitlements": "Entitlements.plist",
+      "infoPlist": "Info.kiro-preview.plist"
+    }
+  }
+}

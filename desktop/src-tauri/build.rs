@@ -16,6 +16,8 @@ fn main() {
     println!("cargo:rerun-if-env-changed=BUZZ_BUILD_OBSERVER_ARCHIVE_DEFAULT");
     println!("cargo:rerun-if-env-changed=BUZZ_BUILD_AGENT_METRIC_ARCHIVE_DEFAULT");
     println!("cargo:rerun-if-env-changed=BUZZ_BUILD_AUTO_CONNECT_DEFAULT_RELAY");
+    println!("cargo:rerun-if-env-changed=BUZZ_BUILD_KEYRING_SERVICE");
+    println!("cargo:rerun-if-env-changed=BUZZ_BUILD_NEST_DIR");
     println!("cargo:rustc-check-cfg=cfg(buzz_updater_enabled)");
 
     if let Ok(relay_url) = std::env::var("BUZZ_RELAY_URL") {
@@ -95,6 +97,33 @@ fn main() {
     // leave this unset and retain explicit community selection.
     if std::env::var("BUZZ_BUILD_AUTO_CONNECT_DEFAULT_RELAY").is_ok() {
         println!("cargo:rustc-env=BUZZ_DESKTOP_BUILD_AUTO_CONNECT_DEFAULT_RELAY=1");
+    }
+
+    // Private distribution flavors can opt into isolated local state without
+    // changing the OSS release defaults. These are compile-time values so a
+    // release build cannot be redirected to another keyring or nest at runtime.
+    if let Ok(service) = std::env::var("BUZZ_BUILD_KEYRING_SERVICE") {
+        let valid = service.starts_with("buzz-desktop-")
+            && service
+                .chars()
+                .all(|ch| ch.is_ascii_alphanumeric() || ch == '-' || ch == '.');
+        assert!(
+            valid,
+            "BUZZ_BUILD_KEYRING_SERVICE must start with 'buzz-desktop-' and contain only ASCII letters, digits, '-' or '.'"
+        );
+        println!("cargo:rustc-env=BUZZ_DESKTOP_BUILD_KEYRING_SERVICE={service}");
+    }
+
+    if let Ok(dir_name) = std::env::var("BUZZ_BUILD_NEST_DIR") {
+        let valid = dir_name.starts_with(".buzz-")
+            && dir_name
+                .chars()
+                .all(|ch| ch.is_ascii_alphanumeric() || ch == '-' || ch == '.');
+        assert!(
+            valid,
+            "BUZZ_BUILD_NEST_DIR must start with '.buzz-' and contain only ASCII letters, digits, '-' or '.'"
+        );
+        println!("cargo:rustc-env=BUZZ_DESKTOP_BUILD_NEST_DIR={dir_name}");
     }
 
     let updater_public_key = std::env::var("BUZZ_UPDATER_PUBLIC_KEY")
